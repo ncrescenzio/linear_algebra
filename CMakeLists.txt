@@ -135,7 +135,46 @@ endif()
 #####################################################################
 
 # Build external libraries
-add_subdirectory(external EXCLUDE_FROM_ALL)
+add_subdirectory(external)
 
 # Build linalg library
 add_subdirectory(libsrcs)
+
+#####################################################################
+
+install(EXPORT linalg-targets
+   FILE linalgTargets.cmake
+   DESTINATION lib/cmake/linalg
+   COMPONENT library
+)
+
+include(CMakePackageConfigHelpers)
+
+# generate the config file that includes the exports
+configure_package_config_file(${CMAKE_CURRENT_SOURCE_DIR}/Config.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/linalgConfig.cmake"
+  INSTALL_DESTINATION "lib/cmake/linalg"
+  NO_SET_AND_CHECK_MACRO
+  NO_CHECK_REQUIRED_COMPONENTS_MACRO
+  )
+
+# generate the version file for the config file
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/linalgConfigVersion.cmake"
+  VERSION "${linalg_VERSION_MAJOR}.${linalg_VERSION_MINOR}"
+  COMPATIBILITY AnyNewerVersion
+)
+
+# install the generated configuration files
+install(FILES
+  ${CMAKE_CURRENT_BINARY_DIR}/linalgConfig.cmake
+  ${CMAKE_CURRENT_BINARY_DIR}/linalgConfigVersion.cmake
+  DESTINATION lib/cmake/linalg
+  COMPONENT library
+  )
+
+# generate the export targets for the build tree
+# needs to be after the install(TARGETS) command
+export(EXPORT linalg-targets
+  FILE "${CMAKE_CURRENT_BINARY_DIR}/linalgTargets.cmake"
+)
