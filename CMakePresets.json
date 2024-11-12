@@ -1,0 +1,43 @@
+{
+   "version": 9,
+   "cmakeMinimumRequired": {
+      "major": 3,
+      "minor": 21,
+      "patch": 0
+   },
+   "configurePresets": [
+      {
+         "name": "unix",
+         "displayName": "Unix default",
+         "description": "Default cmake preset on unix-based systems",
+         "generator": "Unix Makefiles",
+         "binaryDir": "build",
+         "cacheVariables": {
+            "CMAKE_BUILD_TYPE": "Release"
+         }
+      }
+   ],
+   "buildPresets": [
+      {
+         "name": "unix",
+         "configurePreset": "unix",
+         "description": "Default preset on unix-based systems"
+      }
+   ],
+   "workflowPresets": [
+      {
+         "name": "unix-default",
+         "description": "Default preset on unix-based systems",
+         "steps": [
+            {
+               "type": "configure",
+               "name": "unix"
+            },
+            {
+               "type": "build",
+               "name": "unix"
+            }
+         ]
+      }
+   ]
+}
