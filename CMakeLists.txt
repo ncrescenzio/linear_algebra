@@ -35,102 +35,11 @@ endif()
 
 #####################################################################
 
-# Search using LAPACK_DIR or LAPACK_ROOT
-if(LAPACK_DIR OR LAPACK_ROOT)
-   message(VERBOSE "Directory path for Lapack: ${LAPACK_DIR}")
-   message(VERBOSE "Directory path for Lapack: ${LAPACK_ROOT}")
-   find_package(LAPACK REQUIRED PATHS ${LAPACK_DIR} ${LAPACK_ROOT} NO_DEFAULT_PATH)
-   if (LAPACK_FOUND)
-      message(STATUS "Lapack library: ${LAPACK_LIBRARIES}")
-      set(LAPACK_BLAS_LIBRARIES ${LAPACK_LIBRARIES})
-   else()
-      MESSAGE( SEND_ERROR  "***********************************")
-      MESSAGE( SEND_ERROR  "* LAPACK/BLAS LIBRARIES NOT FOUND *")
-      MESSAGE( FATAL_ERROR "***********************************")
-   endif()
+# Find lapack and blas libraries
+include(cmake/lapack_and_blas.cmake)
 
-# Search using OPENBLAS_DIR or OPENBLAS_ROOT
-elseif (OpenBLAS_DIR OR OpenBLAS_ROOT)
-   message(STATUS "Directory path for OpenBLAS: ${OpenBLAS_DIR}")
-   message(STATUS "Directory path for OpenBLAS: ${OpenBLAS_ROOT}")
-   find_package(OpenBLAS REQUIRED PATHS ${OpenBLAS_DIR} ${OpenBLAS_ROOT} NO_DEFAULT_PATH)
-   if (OpenBLAS_FOUND)
-      message(STATUS "OpenBLAS library: ${OpenBLAS_LIBRARIES}")
-      set(LAPACK_BLAS_LIBRARIES ${OpenBLAS_LIBRARIES})
-   else()
-      MESSAGE( SEND_ERROR  "***********************************")
-      MESSAGE( SEND_ERROR  "* LAPACK/BLAS LIBRARIES NOT FOUND *")
-      MESSAGE( FATAL_ERROR "***********************************")
-   endif()
-
-else()
-
-   # Search lapack library using default paths
-   find_package(LAPACK REQUIRED)
-   if (LAPACK_FOUND)
-      message(VERBOSE "Lapack libraries: ${LAPACK_LIBRARIES}")
-      list(GET LAPACK_LIBRARIES 0 LAPACK_LIB)
-      message(STATUS "Lapack library: ${LAPACK_LIB}")
-   else()
-      MESSAGE( SEND_ERROR  "***************************************************")
-      MESSAGE( SEND_ERROR  "* LAPACK LIBRARIES NOT FOUND **********************")
-      MESSAGE( SEND_ERROR  "* Pass the full path of the directory containg it: ")
-      MESSAGE( SEND_ERROR  "* -DLAPACK_DIR=/path/to/LapackConfig.cmake")
-      MESSAGE( SEND_ERROR  "* -DLAPACK_ROOT=/path/to/lapackDirectory")
-      MESSAGE( FATAL_ERROR "***************************************************")
-   endif()
-
-   # Search blas library using default paths
-   find_package(BLAS REQUIRED)
-   if (BLAS_FOUND)
-      message(VERBOSE "Blas libraries: ${BLAS_LIBRARIES}")
-      list(GET BLAS_LIBRARIES 0 BLAS_LIB)
-      message(STATUS "Blas library: ${BLAS_LIB}")
-   else()
-      MESSAGE( SEND_ERROR  "***************************************************")
-      MESSAGE( SEND_ERROR  "* BLAS LIBRARIES NOT FOUND ************************")
-      MESSAGE( SEND_ERROR  "* Pass the full path of the directory containg it: ")
-      MESSAGE( SEND_ERROR  "* -DOpenBLAS_DIR=/path/to/LapackConfig.cmake")
-      MESSAGE( SEND_ERROR  "* -DOpenBLAS_ROOT=/path/to/lapackDirectory")
-      MESSAGE( FATAL_ERROR "***************************************************")
-   endif()
-
-   set(LAPACK_BLAS_LIBRARIES "${LAPACK_LIBRARIES};${BLAS_LIBRARIES}")
-endif()
-
-#####################################################################
-
-# Search "globals" library
-if (NOT TARGET "globals")
-
-   # Try to find "globals" library using
-   # -Dglobals_DIR, -Dglobals_ROOT, -DGLOBALS_DIR and -DGLOBALS_ROOT
-   find_package(globals PATHS ${GLOBALS_ROOT} ${GLOBALS_DIR})
-
-   if (NOT globals_FOUND)
-
-      # Assume that source code for globals library
-      # is in the same directory of linalg library
-      set(GLOBALS_SRC ${CMAKE_CURRENT_SOURCE_DIR}/../globals)
-
-      # Assume the code is already compiled
-      if (EXISTS ${GLOBALS_SRC} AND EXISTS ${GLOBALS_SRC}/build)
-         find_package(globals REQUIRED
-            PATHS ${GLOBALS_SRC}/build/
-            NO_DEFAULT_PATH)
-
-      # The code is not compiled
-      elseif(EXISTS ${GLOBALS_SRC} AND NOT EXISTS ${GLOBALS_SRC}/build)
-         add_subdirectory(${GLOBALS_SRC} ${GLOBALS_SRC}/build EXCLUDE_FROM_ALL)
-
-      else()
-         message(FATAL_ERROR "** Library 'globals' NOT FOUND!")
-
-      endif()
-
-   endif()
-
-endif()
+# Find "globals" library
+include(cmake/globals.cmake)
 
 #####################################################################
 
