@@ -7,31 +7,25 @@ project(linalg LANGUAGES Fortran VERSION 1.0)
 
 #####################################################################
 
-# set default
-if (NOT DEFINED BUILD_TYPE)
-  set (BUILD_TYPE "RELEASE")
-endif()
+# Set default build type
+set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Default build configuration" FORCE)
 
-set (CMAKE_Fortran_FLAGS_BASE "-fPIC -ffree-line-length-none")
-set (CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_BASE} -O5")
-set (CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_BASE} -g -C -Wall -fcheck=all -O")
-set (CMAKE_Fortran_FLAGS_RelWithIEEE "${CMAKE_Fortran_FLAGS_RELEASE} -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans")
+# Set flags for each build type
+set(CMAKE_Fortran_FLAGS_BASE "-fPIC -ffree-line-length-none")
+set(CMAKE_Fortran_FLAGS_RELEASE "${CMAKE_Fortran_FLAGS_BASE} -O5")
+set(CMAKE_Fortran_FLAGS_DEBUG "${CMAKE_Fortran_FLAGS_BASE} -g -DNDEBUG -C -Wall -fcheck=all -O")
+set(CMAKE_Fortran_FLAGS_RELWITHIEEE "${CMAKE_Fortran_FLAGS_RELEASE} -fno-unsafe-math-optimizations -frounding-math -fsignaling-nans")
 
-# set build type (DEBUG/RELEASE)
-if ( ${BUILD_TYPE} MATCHES "DEBUG" )
-  message("** Compiling in debug mode")
-  set ( CMAKE_BUILD_TYPE Debug )
-elseif ( ${BUILD_TYPE} MATCHES "RELEASE"   )
-  message("** Compiling in release mode")
-  set ( CMAKE_BUILD_TYPE RELEASE )
-elseif ( ${BUILD_TYPE} MATCHES "IEEE"   )
-  message("** Compiling in release with IEEE mode")
-  set ( CMAKE_BUILD_TYPE RelWithIEEE )
-else ()
-  set ( CMAKE_BUILD_TYPE user )
-  set ( CMAKE_Fortran_FLAGS_user  "${CMAKE_Fortran_FLAGS_BASE} ${BUILD_TYPE}" )
-  message("** Compiling in user mode:  ${CMAKE_Fortran_FLAGS_user}")
-endif()
+# Check if build type is in the list of admissible build types
+set(CMAKE_CONFIGURATION_TYPES Release Debug RelWithIEEE)
+
+list(FIND CMAKE_CONFIGURATION_TYPES ${CMAKE_BUILD_TYPE} FOUND_MODE)
+if(FOUND_MODE EQUAL -1)
+   message(WARNING "Unknown CMAKE_BUILD_TYPE '${CMAKE_BUILD_TYPE}', using 'Release'.")
+   set(CMAKE_BUILD_TYPE Release)
+endif(FOUND_MODE EQUAL -1)
+
+message(STATUS "Build type: ${CMAKE_BUILD_TYPE}")
 
 #####################################################################
 

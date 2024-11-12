@@ -1,62 +1,55 @@
-# Search using LAPACK_DIR or LAPACK_ROOT
-if(LAPACK_DIR OR LAPACK_ROOT)
-   message(VERBOSE "Directory path for Lapack: ${LAPACK_DIR}")
-   message(VERBOSE "Directory path for Lapack: ${LAPACK_ROOT}")
-   find_package(LAPACK REQUIRED PATHS ${LAPACK_DIR} ${LAPACK_ROOT} NO_DEFAULT_PATH)
-   if (LAPACK_FOUND)
-      message(STATUS "Lapack library: ${LAPACK_LIBRARIES}")
-      set(LAPACK_BLAS_LIBRARIES ${LAPACK_LIBRARIES})
-   else()
-      MESSAGE( SEND_ERROR  "***********************************")
-      MESSAGE( SEND_ERROR  "* LAPACK/BLAS LIBRARIES NOT FOUND *")
-      MESSAGE( FATAL_ERROR "***********************************")
-   endif()
+# Library is specified by the user
+if (LAPACK_LIBRARIES)
+   if (NOT EXISTS ${LAPACK_LIBRARIES})
+      message(FATAL_ERROR "Lapack library does not exists: ${LAPACK_LIBRARIES}")
+   endif ()
 
-# Search using OPENBLAS_DIR or OPENBLAS_ROOT
-elseif (OpenBLAS_DIR OR OpenBLAS_ROOT)
-   message(STATUS "Directory path for OpenBLAS: ${OpenBLAS_DIR}")
-   message(STATUS "Directory path for OpenBLAS: ${OpenBLAS_ROOT}")
-   find_package(OpenBLAS REQUIRED PATHS ${OpenBLAS_DIR} ${OpenBLAS_ROOT} NO_DEFAULT_PATH)
-   if (OpenBLAS_FOUND)
-      message(STATUS "OpenBLAS library: ${OpenBLAS_LIBRARIES}")
-      set(LAPACK_BLAS_LIBRARIES ${OpenBLAS_LIBRARIES})
-   else()
-      MESSAGE( SEND_ERROR  "***********************************")
-      MESSAGE( SEND_ERROR  "* LAPACK/BLAS LIBRARIES NOT FOUND *")
-      MESSAGE( FATAL_ERROR "***********************************")
-   endif()
+# Find directly the library
+elseif (LAPACK_LIBRARY_DIR)
+   find_library(LAPACK_LIBRARIES
+      NAME lapack
+      PATHS ${LAPACK_LIBRARY_DIR}
+      NO_DEFAULT_PATH REQUIRED)
 
-else()
+# Load lapack-config.cmake file
+elseif (LAPACK_DIR OR LAPACK_ROOT)
+   find_package(LAPACK CONFIG
+      PATHS ${LAPACK_DIR} ${LAPACK_ROOT}
+      NO_DEFAULT_PATH REQUIRED)
 
-   # Search lapack library using default paths
-   find_package(LAPACK REQUIRED)
-   if (LAPACK_FOUND)
-      message(VERBOSE "Lapack libraries: ${LAPACK_LIBRARIES}")
-      list(GET LAPACK_LIBRARIES 0 LAPACK_LIB)
-      message(STATUS "Lapack library: ${LAPACK_LIB}")
-   else()
-      MESSAGE( SEND_ERROR  "***************************************************")
-      MESSAGE( SEND_ERROR  "* LAPACK LIBRARIES NOT FOUND **********************")
-      MESSAGE( SEND_ERROR  "* Pass the full path of the directory containg it: ")
-      MESSAGE( SEND_ERROR  "* -DLAPACK_DIR=/path/to/LapackConfig.cmake")
-      MESSAGE( SEND_ERROR  "* -DLAPACK_ROOT=/path/to/lapackDirectory")
-      MESSAGE( FATAL_ERROR "***************************************************")
-   endif()
+# Use cmake FindLAPACK.cmake module
+else ()
+   find_package(LAPACK MODULE REQUIRED)
 
-   # Search blas library using default paths
-   find_package(BLAS REQUIRED)
-   if (BLAS_FOUND)
-      message(VERBOSE "Blas libraries: ${BLAS_LIBRARIES}")
-      list(GET BLAS_LIBRARIES 0 BLAS_LIB)
-      message(STATUS "Blas library: ${BLAS_LIB}")
-   else()
-      MESSAGE( SEND_ERROR  "***************************************************")
-      MESSAGE( SEND_ERROR  "* BLAS LIBRARIES NOT FOUND ************************")
-      MESSAGE( SEND_ERROR  "* Pass the full path of the directory containg it: ")
-      MESSAGE( SEND_ERROR  "* -DOpenBLAS_DIR=/path/to/LapackConfig.cmake")
-      MESSAGE( SEND_ERROR  "* -DOpenBLAS_ROOT=/path/to/lapackDirectory")
-      MESSAGE( FATAL_ERROR "***************************************************")
-   endif()
+endif ()
 
-   set(LAPACK_BLAS_LIBRARIES "${LAPACK_LIBRARIES};${BLAS_LIBRARIES}")
-endif()
+
+# Library is specified by the user
+if (BLAS_LIBRARIES)
+   if (NOT EXISTS ${BLAS_LIBRARIES})
+      message(FATAL_ERROR "Blas library do not exist: ${BLAS_LIBRARIES}")
+   endif ()
+
+# Find directly the library
+elseif (BLAS_LIBRARY_DIR)
+   find_library(BLAS_LIBRARIES
+      NAME blas openblas
+      PATHS ${BLAS_LIBRARY_DIR}
+      NO_DEFAULT_PATH REQUIRED)
+
+# Load blas-config.cmake file
+elseif (BLAS_DIR OR BLAS_ROOT)
+   find_package(BLAS CONFIG
+      PATHS ${BLAS_DIR} ${BLAS_ROOT}
+      NO_DEFAULT_PATH REQUIRED)
+
+# Use cmake FindBLAS.cmake module
+else ()
+   find_package(BLAS MODULE REQUIRED)
+
+endif ()
+
+message(VERBOSE "*** lapack libraries: ${LAPACK_LIBRARIES}")
+message(VERBOSE "*** blas libraries: ${BLAS_LIBRARIES}")
+
+set(LAPACK_BLAS_LIBRARIES "${LAPACK_LIBRARIES};${BLAS_LIBRARIES}")
